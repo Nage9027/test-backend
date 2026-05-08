@@ -1,2 +1,189 @@
-# test-backend
-This is a website it shows the time real time there was not any such kind of databases used in this project
+﻿# TaskFlow ΓÇö Team Task Manager
+
+A full-stack collaborative task management application similar to Trello / Asana,
+with role-based access control, project workspaces, a Kanban board, search,
+filtering, dark mode, and a polished corporate UI.
+
+## Features
+
+### Authentication
+- Email + password sign-up and sign-in
+- JWT-based session, token persisted in `localStorage`
+- Real-time validation with password strength meter on sign-up
+
+### Projects
+- Create, list and switch between projects
+- Each project has its own member list and task board
+- The creator is automatically the project **admin**
+
+### Members
+- Admins can invite existing users to a project by email
+- Admins can remove members (cannot remove themselves)
+- Members are listed with their role badge (`ADMIN` / `MEMBER`)
+
+### Tasks
+- Create tasks with title, description, priority, due date and assignee
+- Drag-and-drop tasks across `To Do ΓåÆ In Progress ΓåÆ Done` columns
+- Inline status dropdown (works on touch devices)
+- Members can update tasks assigned to them; admins can update or delete any task
+- Task cards highlight overdue items in red
+
+### Dashboard
+- Live stats: total / by-status / overdue tasks across every project you belong to
+- Task search by title or description
+- Filter board by status and priority
+- Smooth-scroll sidebar navigation between sections
+- Dark / light mode toggle (preference persisted)
+- Fully responsive (sidebar collapses into a drawer on mobile)
+
+## Tech Stack
+
+| Layer    | Technology                                                       |
+| -------- | ---------------------------------------------------------------- |
+| Frontend | React 19, Vite, React Router, Axios                              |
+| Backend  | Node.js, Express 5, Zod (validation), JSON Web Tokens, bcryptjs   |
+| Database | PostgreSQL via Prisma 6 (works great with Supabase)               |
+| Hosting  | Railway (frontend + backend deployable as separate services)     |
+
+## Project Structure
+
+```
+team-task-manager/
+Γö£ΓöÇΓöÇ backend/
+Γöé   Γö£ΓöÇΓöÇ prisma/
+Γöé   Γöé   ΓööΓöÇΓöÇ schema.prisma          # User, Project, ProjectMember, Task models
+Γöé   Γö£ΓöÇΓöÇ src/
+Γöé   Γöé   Γö£ΓöÇΓöÇ config/prisma.js       # PrismaClient singleton
+Γöé   Γöé   Γö£ΓöÇΓöÇ middleware/auth.js     # JWT auth middleware
+Γöé   Γöé   Γö£ΓöÇΓöÇ routes/
+Γöé   Γöé   Γöé   Γö£ΓöÇΓöÇ auth.routes.js     # /api/auth/{signup,login}
+Γöé   Γöé   Γöé   Γö£ΓöÇΓöÇ project.routes.js  # /api/projects
+Γöé   Γöé   Γöé   Γö£ΓöÇΓöÇ task.routes.js     # /api/projects/:id/tasks
+Γöé   Γöé   Γöé   ΓööΓöÇΓöÇ dashboard.routes.js
+Γöé   Γöé   Γö£ΓöÇΓöÇ utils/projectAccess.js # role-based access helpers
+Γöé   Γöé   Γö£ΓöÇΓöÇ app.js                 # Express app setup
+Γöé   Γöé   ΓööΓöÇΓöÇ server.js              # entry point
+Γöé   Γö£ΓöÇΓöÇ .env.example
+Γöé   ΓööΓöÇΓöÇ package.json
+Γö£ΓöÇΓöÇ frontend/
+Γöé   Γö£ΓöÇΓöÇ src/
+Γöé   Γöé   Γö£ΓöÇΓöÇ pages/
+Γöé   Γöé   Γöé   Γö£ΓöÇΓöÇ AuthPage.jsx       # login/signup with strength meter, dark mode
+Γöé   Γöé   Γöé   Γö£ΓöÇΓöÇ AuthPage.css
+Γöé   Γöé   Γöé   Γö£ΓöÇΓöÇ DashboardPage.jsx  # main workspace with kanban board
+Γöé   Γöé   Γöé   ΓööΓöÇΓöÇ DashboardPage.css
+Γöé   Γöé   Γö£ΓöÇΓöÇ components/ProtectedRoute.jsx
+Γöé   Γöé   Γö£ΓöÇΓöÇ state/{AuthContext,ThemeContext}.jsx
+Γöé   Γöé   Γö£ΓöÇΓöÇ hooks/{useToast,usePasswordStrength}.js
+Γöé   Γöé   Γö£ΓöÇΓöÇ utils/validation.js
+Γöé   Γöé   Γö£ΓöÇΓöÇ api.js                 # axios instance + JWT interceptor
+Γöé   Γöé   Γö£ΓöÇΓöÇ App.jsx
+Γöé   Γöé   ΓööΓöÇΓöÇ main.jsx
+Γöé   Γö£ΓöÇΓöÇ .env.example
+Γöé   ΓööΓöÇΓöÇ package.json
+Γö£ΓöÇΓöÇ package.json                   # root workspace scripts
+ΓööΓöÇΓöÇ README.md
+```
+
+## Local Development
+
+### Prerequisites
+- Node.js 20+
+- A PostgreSQL database (Supabase, local Postgres, Docker, etc.)
+
+### 1. Clone & install
+```bash
+git clone <repo-url> team-task-manager
+cd team-task-manager
+npm install --workspaces=false  # install root tooling (no workspaces in this repo)
+
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+### 2. Configure backend
+```bash
+cd backend
+cp .env.example .env
+# Fill in DATABASE_URL, DIRECT_URL, JWT_SECRET, CLIENT_URL
+```
+
+For Supabase the URLs look like:
+```
+DATABASE_URL="postgresql://postgres:<PWD>@db.<ref>.supabase.co:5432/postgres?sslmode=require"
+DIRECT_URL="postgresql://postgres:<PWD>@db.<ref>.supabase.co:5432/postgres?sslmode=require"
+```
+URL-encode any special characters in the password (e.g. `@` ΓåÆ `%40`).
+
+### 3. Run migrations & start backend
+```bash
+cd backend
+npx prisma migrate deploy   # apply migrations to your DB
+# or, the first time:
+# npx prisma migrate dev --name init
+npm start                   # http://localhost:5000
+```
+
+### 4. Configure & start frontend
+```bash
+cd frontend
+cp .env.example .env
+# VITE_API_URL=http://localhost:5000/api
+npm run dev                 # http://localhost:5173
+```
+
+Sign up with a new account, create a project, invite teammates and start tracking work.
+
+## API Reference
+
+All `/api/projects/**` and `/api/dashboard` routes require a `Bearer` token from `/api/auth/login` or `/api/auth/signup`.
+
+| Method | Endpoint                                               | Notes                          |
+| ------ | ------------------------------------------------------ | ------------------------------ |
+| POST   | `/api/auth/signup`                                     | `{name, email, password}`      |
+| POST   | `/api/auth/login`                                      | `{email, password}`            |
+| GET    | `/api/projects`                                        | List projects you belong to    |
+| POST   | `/api/projects`                                        | Create a project (you become ADMIN) |
+| POST   | `/api/projects/:projectId/members`                     | Admin only ΓÇö `{email, role?}`  |
+| DELETE | `/api/projects/:projectId/members/:userId`             | Admin only                     |
+| GET    | `/api/projects/:projectId/tasks`                       | List tasks (member visible)    |
+| POST   | `/api/projects/:projectId/tasks`                       | Admin only                     |
+| PATCH  | `/api/projects/:projectId/tasks/:taskId`               | Admin or assignee              |
+| DELETE | `/api/projects/:projectId/tasks/:taskId`               | Admin only                     |
+| GET    | `/api/dashboard`                                       | Aggregate metrics              |
+
+## Deployment (Railway)
+
+The backend and frontend deploy as two services in the same Railway project.
+
+### Backend service
+1. **New service ΓåÆ Deploy from GitHub repo**, root directory `backend`.
+2. Add environment variables:
+   - `DATABASE_URL`, `DIRECT_URL` (Supabase Postgres URLs)
+   - `JWT_SECRET` (long random string)
+   - `CLIENT_URL` = `https://<your-frontend>.up.railway.app`
+   - `PORT` = `5000` (Railway auto-assigns; the app respects `process.env.PORT`)
+3. Build command: `npm install && npx prisma generate && npx prisma migrate deploy`
+4. Start command: `npm start`
+
+### Frontend service
+1. **New service ΓåÆ Deploy from GitHub repo**, root directory `frontend`.
+2. Add environment variable:
+   - `VITE_API_URL` = `https://<your-backend>.up.railway.app/api`
+3. Build command: `npm install && npm run build`
+4. Start command: `npm start` (uses `vite preview --host 0.0.0.0 --port $PORT`)
+
+After both services deploy, update the backend's `CLIENT_URL` to the frontend's
+public URL and redeploy so CORS will accept browser requests.
+
+## Submission Checklist
+- [x] Authentication with JWT
+- [x] Role-based access (Admin / Member)
+- [x] Project create + list
+- [x] Member invite + remove
+- [x] Task CRUD with priority, due date, assignee
+- [x] Drag-and-drop Kanban board
+- [x] Dashboard with stats and filters
+- [x] Search & filter tasks
+- [x] Responsive layout + dark mode
+- [x] Deployable on Railway
