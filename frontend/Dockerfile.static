@@ -1,0 +1,16 @@
+# Pre-built static deploy: run `npm run build` locally, commit the `dist/` folder, then deploy with this file.
+# In railway.json set: "dockerfilePath": "Dockerfile.static"
+# (Or rename this file to Dockerfile temporarily.)
+
+FROM node:20-bookworm-slim
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+COPY dist ./dist
+COPY scripts/serve.cjs ./scripts/serve.cjs
+
+CMD ["node", "scripts/serve.cjs"]

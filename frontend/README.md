@@ -16,6 +16,14 @@ React (Vite) UI for the team task manager. It talks to the backend API (configur
 
 ## Deploy on Railway (this repo)
 
-- **Build:** `npm ci && npm run build` (also set in `railway.json`).
-- **Start:** `npm start` serves the `dist` folder on `PORT` (see `scripts/serve.cjs`).
-- **Variables:** This app is static after build. You do **not** need `DATABASE_URL` / `JWT_SECRET` here. Set **`VITE_API_URL`** to your backend base URL including `/api` (for example `https://<your-backend>.up.railway.app/api`) so the bundle is built with the correct API. Redeploy the frontend after changing it.
+Default **`railway.json`** uses the **`Dockerfile`**: Node runs `npm ci` and `vite build` inside Linux, then serves `dist` with `node scripts/serve.cjs`. This avoids Railpack/`npm ci` failures on their Node builder.
+
+- **Variables:** Do **not** add `DATABASE_URL` / `JWT_SECRET` to the frontend service. Optionally set **`VITE_API_URL`** (full API base, e.g. `https://your-backend.up.railway.app/api`). In Railway, mark it as available at **Docker build** time if you use a custom URL (Dockerfile passes it as a build arg).
+- **Public URL:** Enable **Networking → Generate domain** if the service shows as unexposed.
+- If the UI still sets an old **Start Command** (e.g. `npm start`), remove it so the image **`CMD`** is used, or set it to `node scripts/serve.cjs`.
+
+### Deploy only a pre-built `dist` folder (no Vite on Railway)
+
+1. Locally: `npm ci && npm run build`.
+2. Either commit `dist/` (`dist` is gitignored — use `git add -f dist` if you really want it in git), **or** deploy `dist` with a static host (Netlify / Cloudflare Pages / Vercel) by pointing the publish directory to `dist`.
+3. For Railway with a committed `dist`, set **`dockerfilePath`** to **`Dockerfile.static`** in `railway.json` (or swap filenames), then redeploy.
