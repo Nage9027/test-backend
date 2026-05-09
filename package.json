@@ -1,0 +1,12 @@
+{
+  "name": "test-backend-deploy",
+  "private": true,
+  "description": "Railway entrypoint: real app lives in backend/",
+  "scripts": {
+    "build": "npm ci --prefix ./backend && npm run prisma:generate --prefix ./backend",
+    "start": "node ./backend/src/server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
