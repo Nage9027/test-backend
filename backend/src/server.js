@@ -17,7 +17,8 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Bind all interfaces so platforms like Railway/Docker can route to the container.
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server listening on 0.0.0.0:${PORT}`);
 });
 server.ref();
