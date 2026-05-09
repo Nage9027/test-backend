@@ -1,4 +1,6 @@
 node_modules
+# Standalone frontend repo (pushed to test-frountend); do not track nested .git
+frontend/.git
 # Keep environment variables out of version control
 .env
 
