@@ -8,10 +8,22 @@ const dashboardRoutes = require("./routes/dashboard.routes");
 
 const app = express();
 
-const allowedOrigins = (process.env.CLIENT_URL || "")
+const allowedOrigins = (
+  process.env.CLIENT_URL ||
+  "http://localhost:5173,https://test-backend-production-9179.up.railway.app"
+)
   .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
+
+const isRailwayAppDomain = (origin) => {
+  try {
+    const url = new URL(origin);
+    return url.hostname.endsWith(".up.railway.app");
+  } catch {
+    return false;
+  }
+};
 
 app.use(
   cors({
@@ -20,6 +32,8 @@ app.use(
       if (!origin) return callback(null, true);
       if (allowedOrigins.length === 0) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Allow Railway hosted frontend URLs without redeploying for every new domain.
+      if (isRailwayAppDomain(origin)) return callback(null, true);
       return callback(new Error(`Origin ${origin} is not allowed by CORS`));
     },
     credentials: true,
