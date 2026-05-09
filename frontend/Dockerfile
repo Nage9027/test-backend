@@ -4,6 +4,10 @@
 FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
+# Railway (and others) may set NODE_ENV=production during image build; that makes `npm ci`
+# skip devDependencies, so Vite would be missing. Force dev deps for the compile stage.
+ENV NODE_ENV=development
+
 COPY package.json package-lock.json ./
 RUN npm ci
 
